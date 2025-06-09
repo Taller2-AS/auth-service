@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const { AuthUsers, RevokedTokens } = require('../database/sequelize');
 const catchAsync = require('../utils/catchAsync');
 require('dotenv').config();
-
+const publishLog = require('../queue/publisher/logPublisher');
 const jwt_secret = process.env.JWT_SECRET;
 
 const Login = catchAsync(async (call, callback) => {
@@ -30,6 +30,15 @@ const Login = catchAsync(async (call, callback) => {
       { expiresIn: '1h' }
     );
 
+    await publishLog('action', {
+      userId: user._id,
+      email: user.email,
+      method: 'Login',
+      url: '/auth/login',
+      action: 'INICIAR SESIÓN',
+      date: new Date().toISOString()
+    });
+
     callback(null, {
       token,
       id: user.id,
@@ -53,7 +62,7 @@ const UpdatePassword = catchAsync(async (call, callback) => {
     }
 
     const userChange = await AuthUsers.findByPk(userIdChange);
-    
+
     if (!userChange) return callback(new Error('Credenciales inválidas'));
 
     if (userIdChange !== userId && userRole !== 'Administrador') {
@@ -70,6 +79,15 @@ const UpdatePassword = catchAsync(async (call, callback) => {
     }
 
     userChange.password = await bcrypt.hash(newPassword, 10);
+
+    await publishLog('action', {
+      userId: userId,
+      email: null,
+      method: 'UpdatePassword',
+      url: `/auth/usuarios/${id}`,
+      action: 'ACTUALIZAR CONTRASEÑA',
+      date: new Date().toISOString()
+    });
 
     callback(null, {});
   }
@@ -92,6 +110,15 @@ const Logout = catchAsync(async (call, callback) => {
   }
 
   await RevokedTokens.create({ token });
+
+  await publishLog('action', {
+    userId: userId,
+    email: null,
+    method: 'LOGOUT',
+    url: '/auth/logout',
+    action: 'CERRAR SESIÓN',
+    date: new Date().toISOString()
+  });
 
   callback(null, { message: 'Se ha cerrado la sesión correctamente' });
 });
