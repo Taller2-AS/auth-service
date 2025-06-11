@@ -25,7 +25,7 @@ const Login = catchAsync(async (call, callback) => {
     }
 
     const token = jwt.sign(
-      { id: user._id, role: user.role },
+      { id: user._id, role: user.role, email: user.email },
       jwt_secret,
       { expiresIn: '1h' }
     );
