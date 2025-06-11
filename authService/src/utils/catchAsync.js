@@ -1,13 +1,29 @@
+const publishLog = require('../utils/publishLog');
+
+const publishLog = require('../utils/publishLog');
+
 function catchAsync(fn) {
-    return (call, callback) => {
-        fn(call, callback).catch(error => {
-            console.log(error);
-            callback({
-                code: error?.code || 13,
-                message: error?.message || 'Internal server error'
-            })
+  return (call, callback) => {
+    fn(call, callback).catch(async (err) => {
+      try {
+        await publishLog('error', {
+          userId: null,
+          email: '',
+          error: err.message,
+          date: new Date().toISOString()
         });
-    };
+      } catch (logError) {
+        console.error('Error al publicar en el log:', logError);
+      }
+
+      console.error(err);
+
+      callback({
+        code: err?.code || 13,
+        message: err?.message || 'Internal server error'
+      });
+    });
+  };
 }
 
 module.exports = catchAsync;
