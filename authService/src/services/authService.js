@@ -51,7 +51,7 @@ const Login = catchAsync(async (call, callback) => {
 });
 
 const UpdatePassword = catchAsync(async (call, callback) => {
-    const { userId, userRole, userIdChange, password, newPassword, confirmPassword } = call.request;
+    const { userId, userEmail, userRole, userIdChange, password, newPassword, confirmPassword } = call.request;
 
     if (!userId) {
         return callback(new Error('Debes estar autenticado para actualizar la contraseña'));
@@ -82,7 +82,7 @@ const UpdatePassword = catchAsync(async (call, callback) => {
 
     await publishLog('action', {
       userId: userId,
-      email: null,
+      email: userEmail,
       method: 'UpdatePassword',
       url: `/auth/usuarios/${id}`,
       action: 'ACTUALIZAR CONTRASEÑA',
@@ -94,7 +94,7 @@ const UpdatePassword = catchAsync(async (call, callback) => {
 );
 
 const Logout = catchAsync(async (call, callback) => {
-  const { userId, token } = call.request;
+  const { userId, userEmail, token } = call.request;
 
   if (!userId) {
     return callback(new Error('El usuario debe haber iniciado sesión'));
@@ -113,7 +113,7 @@ const Logout = catchAsync(async (call, callback) => {
 
   await publishLog('action', {
     userId: userId,
-    email: null,
+    email: userEmail,
     method: 'LOGOUT',
     url: '/auth/logout',
     action: 'CERRAR SESIÓN',

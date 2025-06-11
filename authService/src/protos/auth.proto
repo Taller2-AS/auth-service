@@ -16,15 +16,17 @@ message LoginInput {
 message PasswordUpdateInput {
   string userId = 1;
   string userRole = 2;
-  string userIdChange = 3;
-  string password = 4;
-  string newPassword = 5;
-  string confirmPassword = 6;
+  string userEmail = 3;
+  string userIdChange = 4;
+  string password = 5;
+  string newPassword = 6;
+  string confirmPassword = 7;
 }
 
 message TokenInput {
   string userId = 1;
-  string token = 2;
+  string userEmail = 2;
+  string token = 3;
 }
 
 message AuthResponse {
